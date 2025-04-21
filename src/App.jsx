@@ -1,97 +1,110 @@
-// src/App.js
 
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import "./App.css";
+import "./App.scss";
 
 function App() {
   const [goals, setGoals] = useState([]);
-  const [newGoal, setNewGoal] = useState("");
-  const [timeRemaining, setTimeRemaining] = useState({});
+  const [newGoalTime, setNewGoalTime] = useState("");
+  const [newGoalName, setNewGoalName] = useState("");
+  const [countdowns, setCountdowns] = useState({});
+  const [isModalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    // Load initial state from cookies
-    const storedGoals = Cookies.get("goals");
-    console.log(storedGoals);
-    if (storedGoals) {
-      setGoals(JSON.parse(storedGoals));
+    const stored = Cookies.get("goals");
+    if (stored) {
+      setGoals(JSON.parse(stored));
     }
   }, []);
 
   useEffect(() => {
-    // Save goals to cookies
-    Cookies.set("goals", JSON.stringify(goals), { expires: 365 });
-
-    // Set up an interval to update the remaining times every second
+    updateCountdowns();
     const interval = setInterval(() => {
-      updateRemainingTimes();
+      updateCountdowns();
     }, 1000);
 
-    // Clear interval on component unmount
     return () => clearInterval(interval);
   }, [goals]);
 
-  const updateRemainingTimes = () => {
-    const newTimeRemaining = {};
+  const updateCountdowns = () => {
+    const newCountdowns = {};
     goals.forEach((goal, index) => {
-      newTimeRemaining[index] = calculateTimeRemaining(goal);
+      newCountdowns[index] = calculateCountdown(goal.time);
     });
-    setTimeRemaining(newTimeRemaining);
+    setCountdowns(newCountdowns);
   };
 
-  const calculateTimeRemaining = (endDate) => {
+  const calculateCountdown = (endDate) => {
     const now = new Date();
     const end = new Date(endDate);
-    const difference = end - now;
-
-    if (difference <= 0) {
-      return "Goal Time Reached!";
-    }
-
+    const difference = Math.abs(end - now);
+    const past = end <= now;
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
     const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((difference / 1000 / 60) % 60);
     const seconds = Math.floor((difference / 1000) % 60);
 
-    return `${hours}h ${minutes}m ${seconds}s`;
+    return `${past ? '+' : ''}${days > 0 ? `${days} days` : `${hours}:${minutes}:${seconds}`}`;
   };
 
   const addGoal = () => {
-    if (newGoal) {
-      setGoals([...goals, new Date(newGoal).toISOString()]);
-      setNewGoal("");
+    if (newGoalTime && newGoalName) {
+      const newGoals = [...goals, { name: newGoalName, time: new Date(newGoalTime).toISOString() }];
+      setGoals(newGoals);
+      setNewGoalName("");
+      setNewGoalTime("");
+      Cookies.set("goals", JSON.stringify(newGoals), { expires: 365 });
+      setModalOpen(false); // Close the modal after adding
     }
   };
 
   const removeGoal = (index) => {
     const newGoals = goals.filter((_, i) => i !== index);
     setGoals(newGoals);
-    const updatedTimeRemaining = Object.keys(timeRemaining)
+    Cookies.set("goals", JSON.stringify(newGoals), { expires: 365 });
+
+    const updatedCountdowns = Object.keys(countdowns)
       .filter((key) => Number(key) !== index)
       .reduce((obj, key) => {
-        obj[key > index ? key - 1 : key] = timeRemaining[key];
+        obj[key > index ? key - 1 : key] = countdowns[key];
         return obj;
       }, {});
-    setTimeRemaining(updatedTimeRemaining);
+
+    setCountdowns(updatedCountdowns);
   };
 
   return (
     <div className="App">
-      <h1>Countdown Timer</h1>
-      <input
-        type="datetime-local"
-        value={newGoal}
-        onChange={(e) => setNewGoal(e.target.value)}
-      />
-      <button onClick={addGoal}>Add Goal</button>
-      <div>
+      <div className="countdowns">
         {goals.map((goal, index) => (
           <div key={index}>
-            <h3>Goal {index + 1}</h3>
-            <p>{timeRemaining[index]}</p>
-            <button onClick={() => removeGoal(index)}>Remove</button>
+            <h1>{countdowns[index]}</h1>
+            <p>{goal.name} <button onClick={() => removeGoal(index)}>×</button></p>
+            
           </div>
         ))}
       </div>
+      <button className="add-button" onClick={() => setModalOpen(true)}>+</button>
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={() => setModalOpen(false)}>&times;</span>
+            <input
+              type="text"
+              placeholder="Name"
+              value={newGoalName}
+              onChange={(e) => setNewGoalName(e.target.value)}
+            />
+            <input
+              type="datetime-local"
+              value={newGoalTime}
+              onChange={(e) => setNewGoalTime(e.target.value)}
+            />
+            <button className='add' onClick={addGoal}>Add</button>&nbsp;
+            <button className='cancel' onClick={() => setModalOpen(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

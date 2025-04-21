@@ -1,0 +1,140 @@
+// src/App.scss
+
+$main-bg-color: #f4f4f9;
+$card-bg-color: #ffffff;
+$primary-color: #2196f3;
+$secondary-color: #f44336;
+$text-color: #333;
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: $main-bg-color;
+  margin: 0;
+  padding: 0;
+  color: $text-color;
+}
+
+#root {
+  width: 100%;
+}
+
+.App {
+  text-align: center;
+  margin-top: 20px;
+  position: relative;
+
+  .countdowns {
+    max-width: 500px;
+    margin: 0 auto;
+    div {
+      background-color: $card-bg-color;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+      h3 {
+        margin: 0 0 10px 0;
+        color: $text-color;
+      }
+
+      p {
+        font-size: 1.2em;
+      }
+
+      button {
+        background-color: $secondary-color;
+        color: white;
+        border: none;
+        padding: 0 5px;
+        border-radius: 5px;
+        cursor: pointer;
+
+        &:hover {
+          background-color: darken($secondary-color, 10%);
+        }
+      }
+    }
+  }
+
+  .add-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+      transform: scale(1.1);
+    }
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .modal-content {
+      background-color: $card-bg-color;
+      padding: 20px;
+      border-radius: 5px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+      .close {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
+      input {
+        width: calc(100% - 22px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button {
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+
+        
+      }
+      button.add {
+        background-color: $primary-color;
+
+        &:hover {
+          background-color: darken($primary-color, 10%);
+        }
+      }
+      button.cancel {
+        background-color: $secondary-color;
+
+        &:hover {
+          background-color: darken($secondary-color, 10%);
+        }
+      }
+    }
+  }
+}
